@@ -5,4 +5,8 @@ admin.site.register(Status)
 admin.site.register(Type)
 admin.site.register(Category)
 admin.site.register(Subcategory)
-admin.site.register(DDSRecord)
+# admin.site.register(DDSRecord)
+
+@admin.register(DDSRecord)
+class DDSRecordAdmin(admin.ModelAdmin):
+    list_display = ['date', 'amount', 'status', 'type', 'category', 'subcategory_id']

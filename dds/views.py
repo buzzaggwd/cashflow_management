@@ -2,6 +2,7 @@ from rest_framework import generics
 from .models import Status, Type, Category, Subcategory, DDSRecord
 from .serializers import StatusSerializer, TypeSerializer, CategorySerializer, SubcategorySerializer, DDSRecordSerializer
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 
 def index(request):
     return render(request, 'dds/index.html')
@@ -41,6 +42,8 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 class SubcategoryListCreate(generics.ListCreateAPIView):
     queryset = Subcategory.objects.all()
     serializer_class = SubcategorySerializer
+    filterset_fields = ['category']  # Позволяет фильтровать по category_id
+    filter_backends = [DjangoFilterBackend]  # Включает фильтрацию
 
 class SubcategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Subcategory.objects.all()

@@ -27,7 +27,7 @@ class Subcategory(models.Model):
     description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.category} / {self.name}"
+        return f"{self.category.name} / {self.name}"
 
 class DDSRecord(models.Model):
     date = models.DateField(auto_now_add=True)  # Автоматически заполняется, но можно редактировать
