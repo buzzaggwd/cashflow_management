@@ -22,6 +22,11 @@ class SubcategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DDSRecordSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source='status.name', read_only=True)
+    type = serializers.CharField(source='type.name', read_only=True)
+    category = serializers.CharField(source='category.name', read_only=True)
+    subcategory = serializers.CharField(source='subcategory.name', read_only=True)
+    
     class Meta:
         model = DDSRecord
         fields = '__all__'

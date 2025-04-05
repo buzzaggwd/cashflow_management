@@ -58,4 +58,3 @@ class DDSRecordListCreate(generics.ListCreateAPIView):
 class DDSRecordDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = DDSRecord.objects.all()
     serializer_class = DDSRecordSerializer
-

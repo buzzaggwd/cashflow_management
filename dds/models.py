@@ -1,14 +1,14 @@
 from django.db import models
 
 class Status(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
 
 class Type(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -23,14 +23,14 @@ class Category(models.Model):
 
 class Subcategory(models.Model):
     name = models.CharField(max_length=50)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     description = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.category.name} / {self.name}"
 
 class DDSRecord(models.Model):
-    date = models.DateField(auto_now_add=True)  # Автоматически заполняется, но можно редактировать
+    date = models.DateField()
     status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True)
     type = models.ForeignKey(Type, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)

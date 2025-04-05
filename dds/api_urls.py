@@ -8,7 +8,7 @@ from .views import (
 )
 
 urlpatterns = [
-    # Справочники
+    # API
     path('statuses/', StatusListCreate.as_view(), name='status-list'),
     path('statuses/<int:pk>/', StatusDetail.as_view(), name='status-detail'),
     
@@ -21,7 +21,6 @@ urlpatterns = [
     path('subcategories/', SubcategoryListCreate.as_view(), name='subcategory-list'),
     path('subcategories/<int:pk>/', SubcategoryDetail.as_view(), name='subcategory-detail'),
     
-    # Записи ДДС
     path('transactions/', DDSRecordListCreate.as_view(), name='transaction-list'),
     path('transactions/<int:pk>/', DDSRecordDetail.as_view(), name='transaction-detail'),
 ]
