@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <a href="/create_transaction" class="btn btn-primary mb-3">Добавить транзакцию</a>
+
+    <!-- Фильтры -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <input type="date" id="filter-date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <select id="filter-status" class="form-control">
+                <option value="">Все статусы</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="filter-type" class="form-control">
+                <option value="">Все типы</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="filter-category" class="form-control">
+                <option value="">Все категории</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="filter-subcategory" class="form-control">
+                <option value="">Все подкатегории</option>
+            </select>
+        </div>
+        <!-- Аналогичные фильтры для типа, категории, подкатегории -->
+    </div>
+
+    <!-- Таблица транзакций -->
+    <table class="table table-striped" id="transactions-table">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Тип</th>
+                <th>Категория</th>
+                <th>Подкатегория</th>
+                <th>Сумма</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+{% endblock %}

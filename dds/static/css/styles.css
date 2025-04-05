@@ -1,0 +1,11 @@
+table {
+    min-width: 800px;
+}
+
+th, td {
+    white-space: nowrap;
+}
+
+td.actions {
+    width: 150px;
+}
