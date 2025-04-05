@@ -9,3 +9,11 @@ th, td {
 td.actions {
     width: 150px;
 }
+
+.modal-backdrop {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.modal-backdrop.show {
+    opacity: 0.5;
+}

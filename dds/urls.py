@@ -13,4 +13,5 @@ urlpatterns = [
     # Frontend
     path('', views.index, name='index'),
     path('create_transaction/', views.create_transaction, name='create-transaction'),
+    path('admin_reference_data/', views.admin_reference_data, name='admin_reference_data'),
 ]

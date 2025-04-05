@@ -10,8 +10,8 @@ def index(request):
 def create_transaction(request):
     return render(request, 'dds/create_transaction.html')
 
-def manage_reference(request):
-    return render(request, 'dds/manage_reference.html')
+def admin_reference_data(request):
+    return render(request, 'dds/admin_reference_data.html')
 
 
 # Справочники
