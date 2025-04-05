@@ -165,10 +165,10 @@ async function loadTransactions() {
                     tableBody.innerHTML += `
                         <tr>
                             <td>${transaction.date}</td>
-                            <td>${transaction.status}</td>
-                            <td>${transaction.type}</td>
-                            <td>${transaction.category}</td>
-                            <td>${transaction.subcategory}</td>
+                            <td>${transaction.status_name || 'Не выбрано'}</td>
+                            <td>${transaction.type_name || 'Не выбрано'}</td>
+                            <td>${transaction.category_name || 'Не выбрано'}</td>
+                            <td>${transaction.subcategory_name || 'Не выбрано'}</td>
                             <td>${transaction.amount}</td>
                             <td>${transaction.comment}</td>
                             <td>

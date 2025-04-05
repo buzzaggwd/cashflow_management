@@ -22,11 +22,11 @@ class SubcategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class DDSRecordSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source='status.name', read_only=True)
-    type = serializers.CharField(source='type.name', read_only=True)
-    category = serializers.CharField(source='category.name', read_only=True)
-    subcategory = serializers.CharField(source='subcategory.name', read_only=True)
-    
+    status_name = serializers.CharField(source='status.name', read_only=True)
+    type_name = serializers.CharField(source='type.name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    subcategory_name = serializers.CharField(source='subcategory.name', read_only=True)
+
     class Meta:
         model = DDSRecord
-        fields = '__all__'
+        fields = ['id', 'date', 'amount', 'comment', 'status', 'type', 'category', 'subcategory', 'status_name', 'type_name', 'category_name', 'subcategory_name']

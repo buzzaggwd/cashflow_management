@@ -53,7 +53,8 @@ class SubcategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 class DDSRecordListCreate(generics.ListCreateAPIView):
     queryset = DDSRecord.objects.all()
     serializer_class = DDSRecordSerializer
-    filterset_fields = ['date', 'status', 'type', 'category', 'subcategory']  # Для фильтрации
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['date', 'status', 'type', 'category', 'subcategory']
 
 class DDSRecordDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = DDSRecord.objects.all()

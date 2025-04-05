@@ -39,4 +39,6 @@ class DDSRecord(models.Model):
     comment = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.date} - {self.amount} руб. ({self.type.name})"
+        status_name = self.status.name if self.status else 'Без статуса'
+        type_name = self.type.name if self.type else 'Без типа'
+        return f"{self.date} - {self.amount} руб. ({type_name}, {status_name})"
