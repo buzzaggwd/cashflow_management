@@ -14,12 +14,9 @@
   </div>
   <div class="mb-3">
     <label class="form-label">Тип</label>
-    <select
-      class="form-control"
-      name="type"
-      id="type-select"
-      onchange="loadCategories(this.value)"
-    ></select>
+    <select class="form-control" name="type" id="type-select">
+      <option value="">Выберите тип</option>
+    </select>
   </div>
   <div class="mb-3">
     <label class="form-label">Категория</label>
@@ -27,8 +24,9 @@
       class="form-control"
       name="category"
       id="category-select"
-      onchange="loadSubcategories(this.value)"
-    ></select>
+      onchange="loadSubcategories(this.value)">
+      <option value="">Выберите категорию</option>
+    </select>
   </div>
   <div class="mb-3">
     <label class="form-label">Подкатегория</label>

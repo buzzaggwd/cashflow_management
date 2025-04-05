@@ -16,8 +16,9 @@ class Type(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
+    type = models.ForeignKey(Type, on_delete=models.CASCADE, default=1)
     description = models.TextField(blank=True)
-
+    
     def __str__(self):
         return self.name
 
@@ -30,7 +31,7 @@ class Subcategory(models.Model):
         return f"{self.category.name} / {self.name}"
 
 class DDSRecord(models.Model):
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
     status = models.ForeignKey(Status, on_delete=models.SET_NULL, null=True)
     type = models.ForeignKey(Type, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)

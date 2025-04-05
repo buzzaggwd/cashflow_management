@@ -50,6 +50,27 @@ async function loadCategories() {
     }
 }
 
+// Загрузка категорий по типу
+async function loadCategoriesByType(typeId) {
+    try {
+        const response = await fetch(`/api/categories-by-type/?type=${typeId}`);
+        const categories = await response.json();
+        const select = document.getElementById("category-select");
+        if (select) {
+            select.innerHTML = '<option value="">Выберите категорию</option>';
+            categories.forEach(category => {
+                select.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+            });
+
+            const selectedCategoryId = select.value;
+            if (selectedCategoryId) {
+                await loadSubcategories(selectedCategoryId);
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки категорий:', error);
+    }
+}
 // Загрузка подкатегорий по категории
 async function loadSubcategories(categoryId) {
     try {
@@ -264,3 +285,15 @@ if (filters) {
         select.addEventListener('change', loadTransactions);
     });
 }
+
+document.getElementById("type-select").addEventListener("change", async (e) => {
+    const typeId = e.target.value;
+    if (typeId) {
+        await loadCategoriesByType(typeId);
+        // Сброс подкатегорий при смене типа
+        const subcategorySelect = document.getElementById("subcategory-select");
+        if (subcategorySelect) {
+            subcategorySelect.innerHTML = '<option value="">Выберите категорию</option>';
+        }
+    }
+});

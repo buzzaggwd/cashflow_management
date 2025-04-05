@@ -12,6 +12,8 @@ class TypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
+    type = serializers.PrimaryKeyRelatedField(queryset=Type.objects.all())
+    
     class Meta:
         model = Category
         fields = '__all__'

@@ -6,6 +6,7 @@ urlpatterns = [
     path('api/statuses/', views.StatusListCreate.as_view(), name='status-list'),
     path('api/types/', views.TypeListCreate.as_view(), name='type-list'),
     path('api/categories/', views.CategoryListCreate.as_view(), name='category-list'),
+    path('api/categories-by-type/', views.CategoryByTypeList.as_view(), name='category-by-type'),
     path('api/subcategories/', views.SubcategoryListCreate.as_view(), name='subcategory-list'),
     path('api/transactions/', views.DDSRecordListCreate.as_view(), name='transaction-list'),
 
