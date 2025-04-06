@@ -58,11 +58,11 @@ http://127.0.0.1:8000/
 
 ## Технологии
 
-Python 3.x
-Django
-Django REST Framework
-SQLite
-HTML + Bootstrap 5
+- Python 3.x
+- Django
+- Django REST Framework
+- SQLite
+- HTML + Bootstrap 5
 
 
 ## Скриншоты
