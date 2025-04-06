@@ -68,4 +68,54 @@
     </div>
 
 </div>
+
+<!-- Модальное окно для редактирования транзакции -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1" aria-labelledby="editTransactionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <form id="edit-transaction-form">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editTransactionLabel">Редактировать транзакцию</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body row g-3">
+            <input type="hidden" id="edit-id" name="id">
+            <div class="col-md-6">
+              <label for="edit-date" class="form-label">Дата</label>
+              <input type="date" class="form-control" id="edit-date" name="date" required>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-status" class="form-label">Статус</label>
+              <select class="form-select" id="edit-status" name="status"></select>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-type" class="form-label">Тип</label>
+              <select class="form-select" id="edit-type" name="type"></select>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-category" class="form-label">Категория</label>
+              <select class="form-select" id="edit-category" name="category"></select>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-subcategory" class="form-label">Подкатегория</label>
+              <select class="form-select" id="edit-subcategory" name="subcategory"></select>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-amount" class="form-label">Сумма</label>
+              <input type="number" class="form-control" id="edit-amount" name="amount" required>
+            </div>
+            <div class="col-12">
+              <label for="edit-comment" class="form-label">Комментарий</label>
+              <input type="text" class="form-control" id="edit-comment" name="comment">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-primary">Сохранить изменения</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
 {% endblock %}
