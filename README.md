@@ -22,29 +22,37 @@
 ```bash
 git clone https://github.com/your-username/dds-app.git
 cd dds-app
+```
 
 
 ### 2. Создайте и активируйте виртуальное окружение (опционально)
 
+```bash
 python -m venv env
 source env\Scripts\activate
+```
 
 
 ### 3. Установите зависимости
 
+```bash
 pip install -r requirements.txt
+```
 
 
 ### 4. Примените миграции и запустите сервер
 
+```bash
 python manage.py migrate
 python manage.py runserver
+```
 
 
 ### 5. Откройте в браузере
 
+```bash
 http://127.0.0.1:8000/
-
+```
 
 
 
@@ -68,6 +76,7 @@ Vanilla JavaScript (модульный подход)
 
 ## Структура проекта
 
+```bash
 cashflow_management/
 ├──dds/               # Основное Django-приложение
     ├── static/               # JS, CSS, иконки
@@ -75,6 +84,7 @@ cashflow_management/
 ├── manage.py
 ├── requirements.txt
 └── README.md
+```
 
 
 ## Автор
