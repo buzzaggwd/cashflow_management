@@ -1,563 +1,214 @@
-function getCSRFToken() {
-    const cookieValue = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("csrftoken="))
-      ?.split("=")[1];
-    return cookieValue ? decodeURIComponent(cookieValue) : null;
-}
-
-// ==========================================
-//                 СТАТУСЫ
-// ==========================================
-async function loadStatuses() {
-    try {
-        const response = await fetch("/api/statuses/?ordering=id");
-        const statuses = await response.json();
-        const tableBody = document
-          .getElementById("status-table")
-          .getElementsByTagName("tbody")[0];
-        tableBody.innerHTML = "";
-        statuses.forEach((status) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${status.id}</td>
-                <td>${status.name}</td>
-                <td>${status.description}</td>
-                <td>
-                    <button type="button" class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#status-modal" data-id="${status.id}">Редактировать</button>
-                    <button type="button" class="btn btn-danger delete-status-btn" data-id="${status.id}">Удалить</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+const modelNames = {
+    status: 'статуса',
+    type: 'типа',
+    category: 'категории',
+    subcategory: 'подкатегории'
+  };
+  
+  function getCSRFToken() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+  }
+  
+  function createRow({ id, name, description, extra }, entity, icon = true) {
+    const row = document.createElement("tr");
+    const extraColumn = extra ? `<td>${extra}</td>` : "";
+    row.innerHTML = `
+      <td>${id}</td>
+      <td>${name}</td>
+      <td>${description}</td>
+      ${extraColumn}
+      <td>
+        <div class="d-flex justify-content-center">
+          <button type="button" class="btn btn-sm btn-outline-primary me-2 edit-btn" 
+                  data-bs-toggle="modal" data-bs-target="#${entity}-modal" 
+                  data-id="${id}" title="Редактировать">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-danger delete-${entity}-btn" 
+                  data-id="${id}" title="Удалить">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </td>`;
+    return row;
+  }
+  
+  function bindModalReset(modalId, formId) {
+    document.getElementById(modalId).addEventListener("hidden.bs.modal", () => {
+      document.getElementById(formId).reset();
+      document.getElementById(`${formId.split('-')[0]}-id`).value = "";
+      const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+      if (modal) modal.dispose();
+    });
+  }
+  
+  function bindSaveButton(entity, endpoint, prepareData = (data) => data) {
+    document.getElementById(`save-${entity}-btn`).addEventListener("click", async () => {
+      const id = document.getElementById(`${entity}-id`).value;
+      const formData = new FormData(document.getElementById(`${entity}-form`));
+      const data = prepareData(Object.fromEntries(formData));
+      const method = id ? "PUT" : "POST";
+      const url = id ? `${endpoint}/${id}/` : endpoint;
+  
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+          },
+          body: JSON.stringify(data),
         });
-    } catch (error) {
-        console.error("Ошибка загрузки статусов:", error);
-    }
-}
-
-// 状态删除按钮点击事件
-document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("delete-status-btn")) {
-        const statusId = e.target.dataset.id;
-        const csrfToken = getCSRFToken();
-
-        if (confirm("Вы уверены, что хотите удалить этот статус?")) {
-            fetch(`/api/statuses/${statusId}/`, {
-                method: "DELETE",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                },
-            })
-              .then((response) => {
-                    if (response.ok) loadStatuses();
-                    else alert("Ошибка: " + response.statusText);
-                })
-              .catch((error) => console.error("Ошибка:", error));
-        }
-    }
-});
-
-// 状态编辑按钮点击事件
-document.addEventListener("click", function (e) {
-    if (
-        e.target.classList.contains("edit-btn") &&
-        e.target.closest("#status-table")
-    ) {
-        const statusId = e.target.dataset.id;
-        fetch(`/api/statuses/${statusId}/`)
-          .then((response) => response.json())
-          .then((status) => {
-                const form = document.getElementById("status-form");
-                form.reset();
-                document.getElementById("status-id").value = status.id;
-                document.getElementById("status-name").value = status.name;
-                document.getElementById("status-description").value =
-                    status.description;
-            })
-          .catch((error) =>
-                console.error("Ошибка загрузки статуса для редактирования:", error)
-            );
-    }
-});
-
-document
-  .getElementById("save-status-btn")
-  .addEventListener("click", async function () {
-        const statusId = document.getElementById("status-id").value;
-        const formData = new FormData(document.getElementById("status-form"));
-        const status = Object.fromEntries(formData);
-        const csrfToken = getCSRFToken();
-
-        try {
-            const response = await fetch(
-                statusId ? `/api/statuses/${statusId}/` : "/api/statuses/",
-                {
-                    method: statusId ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken,
-                    },
-                    body: JSON.stringify(status),
-                }
-            );
-
-            if (response.ok) {
-                const modal = bootstrap.Modal.getInstance(
-                    document.getElementById("status-modal")
-                );
-                modal.hide();
-                loadStatuses();
-            } else {
-                alert("Ошибка: " + (await response.text()));
-            }
-        } catch (error) {
-            console.error("Ошибка:", error);
-        }
+        if (response.ok) {
+          bootstrap.Modal.getInstance(document.getElementById(`${entity}-modal`)).hide();
+          window[`load${capitalize(entity)}s`]();
+        } else alert("Ошибка: " + (await response.text()));
+      } catch (e) {
+        console.error("Ошибка сохранения:", e);
+      }
     });
-
-document
-  .getElementById("status-modal")
-  .addEventListener("hidden.bs.modal", () => {
-        document.getElementById("status-form").reset();
-        const modal = bootstrap.Modal.getInstance(
-            document.getElementById("status-modal")
-        );
-        if (modal) modal.dispose();
+  }
+  
+  function bindDeleteHandler(entity, endpoint, loader) {
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(`.delete-${entity}-btn`)) {
+        const id = e.target.closest(`.delete-${entity}-btn`).dataset.id;
+        if (confirm("Вы уверены, что хотите удалить?")) {
+          fetch(`${endpoint}/${id}/`, {
+            method: "DELETE",
+            headers: { "X-CSRFToken": getCSRFToken() },
+          })
+            .then(res => res.ok ? loader() : alert("Ошибка удаления"))
+            .catch(err => console.error("Ошибка удаления:", err));
+        }
+      }
     });
-
-document.addEventListener("DOMContentLoaded", () => {
+  }
+  
+  function bindEditHandler(entity, endpoint, fields, onEdit = () => {}) {
+    document.addEventListener("click", (e) => {
+      const editBtn = e.target.closest(`.edit-btn`);
+      const id = editBtn?.dataset?.id;
+  
+      if (editBtn && id) {
+        fetch(`${endpoint}/${id}/`)
+          .then(res => res.json())
+          .then(data => {
+            const form = document.getElementById(`${entity}-form`);
+            form.reset();
+            setModalTitle(entity, "edit");
+            fields.forEach(f => document.getElementById(`${entity}-${f}`).value = data[f]);
+            onEdit(data);
+          })
+          .catch(err => console.error("Ошибка загрузки для редактирования:", err));
+      }
+    });
+  }
+  
+  
+  
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+  
+  function setModalTitle(entity, mode = "add") {
+    const action = mode === "edit" ? "Редактирование" : "Добавление";
+    document.getElementById(`${entity}-modal-title`).textContent = `${action} ${modelNames[entity]}`;
+  }
+  
+  function loadEntityList(entity, endpoint, tableId, extraFn = () => "") {
+    return async function () {
+      try {
+        const res = await fetch(`${endpoint}/?ordering=id`);
+        const items = await res.json();
+        const tableBody = document.getElementById(tableId).querySelector("tbody");
+        tableBody.innerHTML = "";
+        items.forEach(item => tableBody.appendChild(
+          createRow({ ...item, extra: extraFn(item) }, entity)
+        ));
+      } catch (err) {
+        console.error(`Ошибка загрузки ${entity}:`, err);
+      }
+    };
+  }
+  
+  async function loadTypesForCategoryForm(selectedId = null) {
+    try {
+      const res = await fetch("/api/types/");
+      const types = await res.json();
+      const select = document.getElementById("category-type");
+      select.innerHTML = '<option value="">Выберите тип</option>';
+      types.forEach(t => select.innerHTML += `<option value="${t.id}" ${t.id === selectedId ? "selected" : ""}>${t.name}</option>`);
+    } catch (e) {
+      console.error("Ошибка загрузки типов:", e);
+    }
+  }
+  
+  async function loadCategoriesForSubcategoryForm(selectedId = null) {
+    try {
+      const res = await fetch("/api/categories/");
+      const cats = await res.json();
+      const select = document.getElementById("subcategory-category");
+      select.innerHTML = '<option value="">Выберите категорию</option>';
+      cats.forEach(c => select.innerHTML += `<option value="${c.id}" ${c.id === selectedId ? "selected" : ""}>${c.name}</option>`);
+    } catch (e) {
+      console.error("Ошибка загрузки категорий:", e);
+    }
+  }
+  
+  // ========================= ENTITIES ========================= //
+  
+  const loadStatuses = loadEntityList("status", "/api/statuses", "status-table");
+  const loadTypes = loadEntityList("type", "/api/types", "type-table");
+  const loadCategories = loadEntityList("category", "/api/categories", "category-table", item => item.type.name);
+  const loadSubcategories = loadEntityList("subcategory", "/api/subcategories", "subcategory-table", item => item.category.name);
+  
+  bindSaveButton("status", "/api/statuses");
+  bindSaveButton("type", "/api/types");
+  bindSaveButton("category", "/api/categories", data => ({ ...data, type_id: parseInt(data.type), type: undefined }));
+  bindSaveButton("subcategory", "/api/subcategories", data => ({ ...data, category_id: parseInt(data.category), category: undefined }));
+  
+  bindDeleteHandler("status", "/api/statuses", loadStatuses);
+  bindDeleteHandler("type", "/api/types", loadTypes);
+  bindDeleteHandler("category", "/api/categories", loadCategories);
+  bindDeleteHandler("subcategory", "/api/subcategories", loadSubcategories);
+  
+  bindEditHandler("status", "/api/statuses", ["id", "name", "description"]);
+  bindEditHandler("type", "/api/types", ["id", "name", "description"]);
+  bindEditHandler("category", "/api/categories", ["id", "name", "description"],
+    (data) => loadTypesForCategoryForm(data.type.id));
+  bindEditHandler("subcategory", "/api/subcategories", ["id", "name", "description"],
+    (data) => loadCategoriesForSubcategoryForm(data.category.id));
+  
+  bindModalReset("status-modal", "status-form");
+  bindModalReset("type-modal", "type-form");
+  bindModalReset("category-modal", "category-form");
+  bindModalReset("subcategory-modal", "subcategory-form");
+  
+  // DOM READY
+  document.addEventListener("DOMContentLoaded", () => {
     loadStatuses();
-});
-
-// ==========================================
-//                  ТИПЫ
-// ==========================================
-async function loadTypes() {
-    try {
-        const response = await fetch("/api/types/?ordering=id");
-        const types = await response.json();
-        const tableBody = document
-          .getElementById("type-table")
-          .getElementsByTagName("tbody")[0];
-        tableBody.innerHTML = "";
-        types.forEach((type) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${type.id}</td>
-                <td>${type.name}</td>
-                <td>${type.description}</td>
-                <td>
-                    <button type="button" class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#type-modal" data-id="${type.id}">Редактировать</button>
-                    <button type="button" class="btn btn-danger delete-type-btn" data-id="${type.id}">Удалить</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Ошибка загрузки типов:", error);
-    }
-}
-
-// 类型删除按钮点击事件
-document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("delete-type-btn")) {
-        const typeId = e.target.dataset.id;
-        const csrfToken = getCSRFToken();
-
-        if (confirm("Вы уверены, что хотите удалить этот тип?")) {
-            fetch(`/api/types/${typeId}/`, {
-                method: "DELETE",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                },
-            })
-              .then((response) => {
-                    if (response.ok) loadTypes();
-                    else alert("Ошибка: " + response.statusText);
-                })
-              .catch((error) => console.error("Ошибка:", error));
-        }
-    }
-});
-
-// 类型编辑按钮点击事件
-document.addEventListener("click", function (e) {
-    if (
-        e.target.classList.contains("edit-btn") &&
-        e.target.closest("#type-table")
-    ) {
-        const typeId = e.target.dataset.id;
-        fetch(`/api/types/${typeId}/`)
-          .then((response) => response.json())
-          .then((type) => {
-                const form = document.getElementById("type-form");
-                form.reset();
-                document.getElementById("type-id").value = type.id;
-                document.getElementById("type-name").value = type.name;
-                document.getElementById("type-description").value = type.description;
-            })
-          .catch((error) =>
-                console.error("Ошибка загрузки типа для редактирования:", error)
-            );
-    }
-});
-
-document
-  .getElementById("save-type-btn")
-  .addEventListener("click", async function () {
-        const typeId = document.getElementById("type-id").value;
-        const formData = new FormData(document.getElementById("type-form"));
-        const type = Object.fromEntries(formData);
-        const csrfToken = getCSRFToken();
-
-        try {
-            const response = await fetch(
-                typeId ? `/api/types/${typeId}/` : "/api/types/",
-                {
-                    method: typeId ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken,
-                    },
-                    body: JSON.stringify(type),
-                }
-            );
-
-            if (response.ok) {
-                const modal = bootstrap.Modal.getInstance(
-                    document.getElementById("type-modal")
-                );
-                modal.hide();
-                loadTypes();
-            } else {
-                alert("Ошибка: " + (await response.text()));
-            }
-        } catch (error) {
-            console.error("Ошибка:", error);
-        }
-    });
-
-document
-  .getElementById("type-modal")
-  .addEventListener("hidden.bs.modal", () => {
-        document.getElementById("type-form").reset();
-        const modal = bootstrap.Modal.getInstance(
-            document.getElementById("type-modal")
-        );
-        if (modal) modal.dispose();
-    });
-
-document.addEventListener("DOMContentLoaded", () => {
     loadTypes();
-});
-
-// ==========================================
-//               КАТЕГОРИИ
-// ==========================================
-async function loadCategories() {
-    try {
-        const response = await fetch("/api/categories/?ordering=id");
-        const categories = await response.json();
-        const tableBody = document
-          .getElementById("category-table")
-          .getElementsByTagName("tbody")[0];
-        tableBody.innerHTML = "";
-
-        categories.forEach((category) => {
-            const row = document.createElement("tr");
-            // В loadCategories()
-            row.innerHTML = `
-<td>${category.id}</td>
-<td>${category.name}</td>
-<td>${category.description}</td>
-<td>${category.type.name}</td>  <!-- Исправлено -->
-<td>
-    <button type="button" class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#category-modal" data-id="${category.id}">Редактировать</button>
-    <button type="button" class="btn btn-danger delete-category-btn" data-id="${category.id}">Удалить</button>
-</td>
-`;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Ошибка загрузки категорий:", error);
-    }
-}
-
-document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("delete-category-btn")) {
-        const categoryId = e.target.dataset.id;
-        const csrfToken = getCSRFToken();
-
-        if (confirm("Вы уверены, что хотите удалить эту категорию?")) {
-            fetch(`/api/categories/${categoryId}/`, {
-                method: "DELETE",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                },
-            })
-              .then((response) => {
-                    if (response.ok) loadCategories();
-                    else alert("Ошибка: " + response.statusText);
-                })
-              .catch((error) => console.error("Ошибка:", error));
-        }
-    }
-});
-
-document.addEventListener("click", function (e) {
-    if (
-        e.target.classList.contains("edit-btn") &&
-        e.target.closest("#category-table")
-    ) {
-        const categoryId = e.target.dataset.id;
-        fetch(`/api/categories/${categoryId}/`)
-          .then((response) => response.json())
-          .then((category) => {
-                const form = document.getElementById("category-form");
-                form.reset();
-                document.getElementById("category-id").value = category.id;
-                document.getElementById("category-name").value = category.name;
-                document.getElementById("category-description").value =
-                    category.description;
-                loadTypesForCategoryForm(category.type.id);
-            })
-          .catch((error) =>
-                console.error("Ошибка загрузки категории для редактирования:", error)
-            );
-    }
-});
-
-async function loadTypesForCategoryForm(selectedTypeId = null) {
-    try {
-        const response = await fetch("/api/types/");
-        const types = await response.json();
-        const select = document.getElementById("category-type");
-        select.innerHTML = '<option value="">Выберите тип</option>';
-
-        types.forEach((type) => {
-            select.innerHTML += `<option value="${type.id}" ${
-                type.id === selectedTypeId ? "selected" : ""
-            }>${type.name}</option>`;
-        });
-    } catch (error) {
-        console.error("Ошибка загрузки типов:", error);
-    }
-}
-
-document.getElementById('add-category-btn').addEventListener('click', () => {
-    document.getElementById("category-id").value = ""; // <--- сброс ID
-    loadTypesForCategoryForm(); // Автоматическая загрузка типов
-});
-
-
-document
-  .getElementById("save-category-btn")
-  .addEventListener("click", async function () {
-    const categoryId = document.getElementById("category-id").value;
-    const formData = new FormData(document.getElementById("category-form"));
-    const category = Object.fromEntries(formData);
-    const csrfToken = getCSRFToken();
-
-    // ✨ Исправление здесь:
-    if (category.type) {
-      category.type_id = parseInt(category.type);
-      delete category.type;
-    }
-
-    try {
-      const response = await fetch(
-        categoryId ? `/api/categories/${categoryId}/` : "/api/categories/",
-        {
-          method: categoryId ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
-          },
-          body: JSON.stringify(category),
-        }
-      );
-
-      if (response.ok) {
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("category-modal")
-        );
-        modal.hide();
-        loadCategories();
-      } else {
-        alert("Ошибка: " + (await response.text()));
-      }
-    } catch (error) {
-      console.error("Ошибка:", error);
-    }
-  });
-
-
-  document
-  .getElementById("category-modal")
-  .addEventListener("hidden.bs.modal", () => {
-    document.getElementById("category-form").reset();
-    document.getElementById("category-id").value = ""; // <--- добавим и сюда
-    const modal = bootstrap.Modal.getInstance(
-      document.getElementById("category-modal")
-    );
-    if (modal) modal.dispose();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
     loadCategories();
-});
-
-// ==========================================
-//            ПОДКАТЕГОРИИ
-// ==========================================
-async function loadSubcategories() {
-    try {
-        const response = await fetch("/api/subcategories/?ordering=id");
-        const subcategories = await response.json();
-        const tableBody = document
-          .getElementById("subcategory-table")
-          .getElementsByTagName("tbody")[0];
-        tableBody.innerHTML = "";
-
-        subcategories.forEach((subcategory) => {
-            const row = document.createElement("tr");
-            // В loadSubcategories()
-            row.innerHTML = `
-<td>${subcategory.id}</td>
-<td>${subcategory.name}</td>
-<td>${subcategory.description}</td>
-<td>${subcategory.category.name}</td>  <!-- Исправлено -->
-<td>
-    <button type="button" class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#subcategory-modal" data-id="${subcategory.id}">Редактировать</button>
-    <button type="button" class="btn btn-danger delete-subcategory-btn" data-id="${subcategory.id}">Удалить</button>
-</td>
-`;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Ошибка загрузки подкатегорий:", error);
-    }
-}
-
-document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("delete-subcategory-btn")) {
-        const subcategoryId = e.target.dataset.id;
-        const csrfToken = getCSRFToken();
-
-        if (confirm("Вы уверены, что хотите удалить эту подкатегорию?")) {
-            fetch(`/api/subcategories/${subcategoryId}/`, {
-                method: "DELETE",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                },
-            })
-              .then((response) => {
-                    if (response.ok) loadSubcategories();
-                    else alert("Ошибка: " + response.statusText);
-                })
-              .catch((error) => console.error("Ошибка:", error));
-        }
-    }
-});
-
-document.addEventListener("click", function (e) {
-    if (
-        e.target.classList.contains("edit-btn") &&
-        e.target.closest("#subcategory-table")
-    ) {
-        const subcategoryId = e.target.dataset.id;
-        fetch(`/api/subcategories/${subcategoryId}/`)
-          .then((response) => response.json())
-          .then((subcategory) => {
-                const form = document.getElementById("subcategory-form");
-                form.reset();
-                document.getElementById("subcategory-id").value = subcategory.id;
-                document.getElementById("subcategory-name").value = subcategory.name;
-                document.getElementById("subcategory-description").value =
-                    subcategory.description;
-                loadCategoriesForSubcategoryForm(subcategory.category.id);
-            })
-          .catch((error) =>
-                console.error("Ошибка загрузки подкатегории для редактирования:", error)
-            );
-    }
-});
-
-async function loadCategoriesForSubcategoryForm(selectedCategoryId = null) {
-    try {
-        const response = await fetch('/api/categories/');
-        const categories = await response.json();
-        const select = document.getElementById('subcategory-category');
-        select.innerHTML = '<option value="">Выберите категорию</option>';
-
-        categories.forEach(category => {
-            select.innerHTML += `<option value="${category.id}" ${category.id === selectedCategoryId ? 'selected' : ''}>${category.name}</option>`;
-        });
-    } catch (error) {
-        console.error('Ошибка загрузки категорий:', error);
-    }
-}
-
-document.getElementById('add-subcategory-btn').addEventListener('click', () => {
-    document.getElementById("subcategory-id").value = ""; // <--- сброс ID
-    loadCategoriesForSubcategoryForm(); // (если есть такая функция)
-});
-
-document
-  .getElementById("save-subcategory-btn")
-  .addEventListener("click", async function () {
-    const subcategoryId = document.getElementById("subcategory-id").value;
-    const formData = new FormData(document.getElementById("subcategory-form"));
-    const subcategory = Object.fromEntries(formData);
-    const csrfToken = getCSRFToken();
-
-    // 🔧 Главное исправление
-    if (subcategory.category) {
-      subcategory.category_id = parseInt(subcategory.category);
-      delete subcategory.category;
-    }
-
-    try {
-      const response = await fetch(
-        subcategoryId
-          ? `/api/subcategories/${subcategoryId}/`
-          : "/api/subcategories/",
-        {
-          method: subcategoryId ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
-          },
-          body: JSON.stringify(subcategory),
-        }
-      );
-
-      if (response.ok) {
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("subcategory-modal")
-        );
-        modal.hide();
-        loadSubcategories();
-      } else {
-        alert("Ошибка: " + (await response.text()));
-      }
-    } catch (error) {
-      console.error("Ошибка:", error);
-    }
-  });
-
-
-document
-  .getElementById("subcategory-modal")
-  .addEventListener("hidden.bs.modal", () => {
-        document.getElementById("subcategory-form").reset();
-        document.getElementById("subcategory-id").value = "";
-        const modal = bootstrap.Modal.getInstance(
-            document.getElementById("subcategory-modal")
-        );
-        if (modal) modal.dispose();
-    });
-
-document.addEventListener("DOMContentLoaded", () => {
     loadSubcategories();
-});    
+  
+    document.getElementById("add-status-btn")?.addEventListener("click", () => {
+      setModalTitle("status");
+    });
+  
+    document.getElementById("add-type-btn")?.addEventListener("click", () => {
+      setModalTitle("type");
+    });
+  
+    document.getElementById("add-category-btn")?.addEventListener("click", () => {
+      setModalTitle("category");
+      loadTypesForCategoryForm();
+    });
+  
+    document.getElementById("add-subcategory-btn")?.addEventListener("click", () => {
+      setModalTitle("subcategory");
+      loadCategoriesForSubcategoryForm();
+    });
+  });
+  

@@ -1,299 +1,170 @@
-// Загрузка справочников при старте
-async function loadStatuses() {
+// Вспомогательная функция для загрузки справочников в select
+async function loadOptions(url, selectId, defaultText = "Выбрать", valueField = "id", labelField = "name") {
     try {
-        const response = await fetch("/api/statuses/");
-        const statuses = await response.json();
-        console.log("Статусы:", statuses);
-        const select = document.getElementById("status-select");
+        const response = await fetch(url);
+        const items = await response.json();
+        const select = document.getElementById(selectId);
         if (select) {
-            select.innerHTML = '<option value="">Все статусы</option>';
-            statuses.forEach((status) => {
-                select.innerHTML += `<option value="${status.id}">${status.name}</option>`;
+            select.innerHTML = `<option value="">${defaultText}</option>`;
+            items.forEach(item => {
+                select.innerHTML += `<option value="${item[valueField]}">${item[labelField]}</option>`;
             });
         }
     } catch (error) {
-        console.error("Ошибка:", error);
+        console.error(`Ошибка загрузки из ${url}:`, error);
     }
 }
 
-async function loadTypes() {
+// Загрузка транзакций
+async function loadTransactions() {
+    const getValue = id => document.getElementById(id)?.value || "";
+    const params = new URLSearchParams({
+        date: getValue("filter-date"),
+        status: getValue("filter-status"),
+        type: getValue("filter-type"),
+        category: getValue("filter-category"),
+        subcategory: getValue("filter-subcategory"),
+    });
+
     try {
-        const response = await fetch("/api/types/");
-        const types = await response.json();
-        console.log("Типы:", types);
-        const select = document.getElementById("type-select");
-        if (select) {
-            select.innerHTML = '<option value="">Все типы</option>';
-            types.forEach((type) => {
-                select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+        const response = await fetch(`/api/transactions/?${params}`);
+        const transactions = await response.json();
+        const tableBody = document.getElementById("transactions-table")?.querySelector("tbody");
+        if (tableBody) {
+            tableBody.innerHTML = "";
+            transactions.forEach(t => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${t.date}</td>
+                        <td>${t.status_name || "—"}</td>
+                        <td>${t.type_name || "—"}</td>
+                        <td>${t.category_name || "—"}</td>
+                        <td>${t.subcategory_name || "—"}</td>
+                        <td>${t.amount}</td>
+                        <td>${t.comment}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary edit-btn me-1" data-id="${t.id}" title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${t.id}" title="Удалить">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             });
+            
         }
     } catch (error) {
-        console.error("Ошибка:", error);
+        console.error("Ошибка загрузки транзакций:", error);
     }
 }
 
-// Загрузка категорий без фильтрации по типу
-async function loadCategories() {
-    try {
-        const response = await fetch("/api/categories/");
-        const categories = await response.json();
-        const select = document.getElementById("category-select");
-        if (select) {
-            select.innerHTML = '<option value="">Все категории</option>';
-            categories.forEach((category) => {
-                select.innerHTML += `<option value="${category.id}">${category.name}</option>`;
-            });
-        }
-    } catch (error) {
-        console.error("Ошибка:", error);
-    }
+// Загрузка подкатегорий по категории
+async function loadSubcategories(categoryId) {
+    await loadOptions(`/api/subcategories/?category=${categoryId}`, "subcategory-select", "Выберите подкатегорию");
 }
 
 // Загрузка категорий по типу
 async function loadCategoriesByType(typeId) {
-    try {
-        const response = await fetch(`/api/categories-by-type/?type=${typeId}`);
-        const categories = await response.json();
-        const select = document.getElementById("category-select");
-        if (select) {
-            select.innerHTML = '<option value="">Выберите категорию</option>';
-            categories.forEach(category => {
-                select.innerHTML += `<option value="${category.id}">${category.name}</option>`;
-            });
-
-            const selectedCategoryId = select.value;
-            if (selectedCategoryId) {
-                await loadSubcategories(selectedCategoryId);
-            }
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки категорий:', error);
-    }
-}
-// Загрузка подкатегорий по категории
-async function loadSubcategories(categoryId) {
-    try {
-        const response = await fetch(`/api/subcategories/?category=${categoryId}`);
-        const subcategories = await response.json();
-        const select = document.getElementById("subcategory-select");
-        if (select) {
-            select.innerHTML = '<option value="">Выберите категорию</option>';
-
-            if (subcategories.length === 0) {
-                select.innerHTML += '<option value="">Нет подкатегорий</option>';
-                return;
-            }
-
-            subcategories.forEach((subcategory) => {
-                select.innerHTML += `<option value="${subcategory.id}">${subcategory.name}</option>`;
-            });
-        }
-    } catch (error) {
-        console.error("Ошибка загрузки подкатегорий:", error);
-    }
+    await loadOptions(`/api/categories-by-type/?type=${typeId}`, "category-select", "Выберите категорию");
+    const selectedCategoryId = document.getElementById("category-select")?.value;
+    if (selectedCategoryId) await loadSubcategories(selectedCategoryId);
 }
 
-// Загрузка справочников для фильтров на index.html
-async function loadStatusesForFilter() {
-    try {
-        const response = await fetch('/api/statuses/');
-        const statuses = await response.json();
-        const select = document.getElementById('filter-status');
-        if (select) {
-            select.innerHTML = '<option value="">Все статусы</option>';
-            statuses.forEach(status => {
-                select.innerHTML += `<option value="${status.id}">${status.name}</option>`;
-            });
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки статусов для фильтра:', error);
-    }
+// Показ уведомлений
+function showMessage(message, type = "success") {
+    const container = document.getElementById("message-container");
+    if (!container) return;
+    container.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+        </div>
+    `;
 }
 
-async function loadTypesForFilter() {
-    try {
-        const response = await fetch('/api/types/');
-        const types = await response.json();
-        const select = document.getElementById('filter-type');
-        if (select) {
-            select.innerHTML = '<option value="">Все типы</option>';
-            types.forEach(type => {
-                select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
-            });
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки типов для фильтра:', error);
-    }
+// Получение CSRF токена
+function getCSRFToken() {
+    return document.cookie.split("; ").find(row => row.startsWith("csrftoken="))?.split("=")[1] || "";
 }
 
-async function loadCategoriesForFilter() {
-    try {
-        const response = await fetch('/api/categories/');
-        const categories = await response.json();
-        const select = document.getElementById('filter-category');
-        if (select) {
-            select.innerHTML = '<option value="">Все категории</option>';
-            categories.forEach(category => {
-                select.innerHTML += `<option value="${category.id}">${category.name}</option>`;
-            });
+// Обработчик формы транзакции
+function setupTransactionForm() {
+    const form = document.getElementById("transaction-form");
+    if (!form) return;
+
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const category = document.getElementById("category-select")?.value;
+        const subcategory = document.getElementById("subcategory-select")?.value;
+
+        if (subcategory && !category) {
+            showMessage("Выберите категорию перед подкатегорией!", "danger");
+            return;
         }
-    } catch (error) {
-        console.error('Ошибка загрузки категорий для фильтра:', error);
-    }
-}
 
-async function loadSubcategoriesForFilter() {
-    try {
-        const response = await fetch('/api/subcategories/');
-        const subcategories = await response.json();
-        const select = document.getElementById('filter-subcategory');
-        if (select) {
-            select.innerHTML = '<option value="">Все подкатегории</option>';
-            subcategories.forEach(subcategory => {
-                select.innerHTML += `<option value="${subcategory.id}">${subcategory.name}</option>`;
-            });
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки подкатегорий для фильтра:', error);
-    }
-}
-
-// Загрузка транзакций с фильтрами
-async function loadTransactions() {
-    const date = document.getElementById('filter-date');
-    const status = document.getElementById('filter-status');
-    const type = document.getElementById('filter-type');
-    const category = document.getElementById('filter-category');
-    const subcategory = document.getElementById('filter-subcategory');
-
-    if (date && status && type && category && subcategory) {
-        const dateValue = date.value;
-        const statusValue = status.value;
-        const typeValue = type.value;
-        const categoryValue = category.value;
-        const subcategoryValue = subcategory.value;
+        const formData = new FormData(form);
+        const transaction = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch(`/api/transactions/?date=${dateValue}&status=${statusValue}&type=${typeValue}&category=${categoryValue}&subcategory=${subcategoryValue}`);
-            const transactions = await response.json();
+            const response = await fetch("/api/transactions/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken(),
+                },
+                body: JSON.stringify(transaction),
+            });
 
-            const tableBody = document.getElementById('transactions-table').querySelector('tbody');
-            if (tableBody) {
-                tableBody.innerHTML = '';
-
-                transactions.forEach(transaction => {
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td>${transaction.date}</td>
-                            <td>${transaction.status_name || 'Не выбрано'}</td>
-                            <td>${transaction.type_name || 'Не выбрано'}</td>
-                            <td>${transaction.category_name || 'Не выбрано'}</td>
-                            <td>${transaction.subcategory_name || 'Не выбрано'}</td>
-                            <td>${transaction.amount}</td>
-                            <td>${transaction.comment}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm edit-btn" data-id="${transaction.id}">Изменить</button>
-                                <button class="btn btn-danger btn-sm delete-btn" data-id="${transaction.id}">Удалить</button>
-                            </td>
-                        </tr>
-                    `;
-                });
+            if (response.ok) {
+                showMessage("Транзакция успешно создана!");
+                form.reset();
+                loadTransactions();
+            } else {
+                const text = await response.text();
+                showMessage("Ошибка: " + text, "danger");
             }
         } catch (error) {
-            console.error('Ошибка загрузки транзакций:', error);
+            console.error("Ошибка:", error);
+            showMessage("Произошла ошибка при создании транзакции.", "danger");
         }
-    }
-}
-
-// Запуск при загрузке страницы
-document.addEventListener("DOMContentLoaded", () => {
-    loadStatuses();
-    loadTypes();
-    loadCategories(); // Загрузка категорий сразу
-
-    if (document.getElementById('transactions-table')) {
-        loadStatusesForFilter();
-        loadTypesForFilter();
-        loadCategoriesForFilter();
-        loadSubcategoriesForFilter();
-        loadTransactions();
-    }
-
-    const form = document.getElementById("transaction-form");
-    if (form) {
-        form.addEventListener("submit", async (e) => {
-            const categoryId = document.getElementById("category-select");
-            const subcategoryId = document.getElementById("subcategory-select");
-
-            if (categoryId && subcategoryId) {
-                const categoryValue = categoryId.value;
-                const subcategoryValue = subcategoryId.value;
-
-                if (subcategoryValue && !categoryValue) {
-                    alert("Выберите категорию перед подкатегорией!");
-                    e.preventDefault();
-                    return;
-                }
-
-                const transaction = {};
-                const formData = new FormData(form);
-                formData.forEach((value, key) => {
-                    transaction[key] = value;
-                });
-
-                try {
-                    const response = await fetch("/api/transactions/", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": getCSRFToken(),
-                        },
-                        body: JSON.stringify(transaction),
-                    });
-
-                    if (response.ok) {
-                        alert("Транзакция успешно создана!");
-                        form.reset();
-                        if (document.getElementById('transactions-table')) {
-                            loadTransactions();
-                        }
-                    } else {
-                        alert("Ошибка: " + (await response.text()));
-                    }
-                } catch (error) {
-                    console.error("Ошибка:", error);
-                }
-            }
-        });
-    }
-});
-
-// Получение CSRF-токена
-function getCSRFToken() {
-    const cookieValue = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("csrftoken="))
-      ?.split("=")[1];
-    return cookieValue ? decodeURIComponent(cookieValue) : null;
-}
-
-// Применение фильтров
-const filters = document.querySelectorAll('.filter');
-if (filters) {
-    filters.forEach(select => {
-        select.addEventListener('change', loadTransactions);
     });
 }
 
-document.getElementById("type-select").addEventListener("change", async (e) => {
-    const typeId = e.target.value;
-    if (typeId) {
-        await loadCategoriesByType(typeId);
-        // Сброс подкатегорий при смене типа
-        const subcategorySelect = document.getElementById("subcategory-select");
-        if (subcategorySelect) {
-            subcategorySelect.innerHTML = '<option value="">Выберите категорию</option>';
+// Установка обработчиков
+function setupEventListeners() {
+    document.getElementById("type-select")?.addEventListener("change", async e => {
+        const typeId = e.target.value;
+        if (typeId) {
+            await loadCategoriesByType(typeId);
+            document.getElementById("subcategory-select").innerHTML = '<option value="">Выберите подкатегорию</option>';
         }
+    });
+
+    document.querySelectorAll(".filter").forEach(el => {
+        el.addEventListener("change", loadTransactions);
+    });
+}
+
+// Инициализация при загрузке
+document.addEventListener("DOMContentLoaded", () => {
+    loadOptions("/api/statuses/", "status-select", "Все статусы");
+    loadOptions("/api/types/", "type-select", "Выберите тип");
+    loadOptions("/api/categories/", "category-select", "Выберите категорию");
+    loadOptions("/api/subcategories/", "subcategory-select", "Выберите подкатегорию");
+
+    if (document.getElementById("transactions-table")) {
+        loadOptions("/api/statuses/", "filter-status", "Все статусы");
+        loadOptions("/api/types/", "filter-type", "Все типы");
+        loadOptions("/api/categories/", "filter-category", "Все категории");
+        loadOptions("/api/subcategories/", "filter-subcategory", "Все подкатегории");
+        loadTransactions();
     }
+
+    setupTransactionForm();
+    setupEventListeners();
 });

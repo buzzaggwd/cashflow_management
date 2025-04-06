@@ -1,49 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <a href="/create_transaction" class="btn btn-primary mb-3">Добавить транзакцию</a>
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Транзакции</h1>
+        <div>
+            <a href="/create_transaction" class="btn btn-outline-success me-2">
+                + Добавить транзакцию
+            </a>
+            <a href="/admin_reference_data" class="btn btn-outline-primary">
+                Управление справочниками
+            </a>
+        </div>
+    </div>
 
     <!-- Фильтры -->
-    <div class="row g-3 mb-3">
-        <div class="col-md-3">
-            <input type="date" id="filter-date" class="form-control filter">
-        </div>
-        <div class="col-md-3">
-            <select id="filter-status" class="form-control filter">
-                <option value="">Все статусы</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select id="filter-type" class="form-control filter">
-                <option value="">Все типы</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select id="filter-category" class="form-control filter">
-                <option value="">Все категории</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select id="filter-subcategory" class="form-control filter">
-                <option value="">Все подкатегории</option>
-            </select>
+    <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="date" id="filter-date" class="form-control filter" placeholder="Дата">
+                </div>
+                <div class="col-md-3">
+                    <select id="filter-status" class="form-select filter">
+                        <option value="">Все статусы</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filter-type" class="form-select filter">
+                        <option value="">Все типы</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filter-category" class="form-select filter">
+                        <option value="">Все категории</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filter-subcategory" class="form-select filter">
+                        <option value="">Все подкатегории</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Таблица транзакций -->
-    <table class="table table-striped" id="transactions-table">
-        <thead>
-            <tr>
-                <th>Дата</th>
-                <th>Статус</th>
-                <th>Тип</th>
-                <th>Категория</th>
-                <th>Подкатегория</th>
-                <th>Сумма</th>
-                <th>Комментарий</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body p-2">
+            <table class="table table-sm table-striped align-middle text-center mb-0" id="transactions-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                        <th>Тип</th>
+                        <th>Категория</th>
+                        <th>Подкатегория</th>
+                        <th>Сумма</th>
+                        <th>Комментарий</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
