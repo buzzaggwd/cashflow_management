@@ -77,7 +77,7 @@ HTML + Bootstrap 5
 ```bash
 cashflow_management/
 ├──dds/               # Основное Django-приложение
-    ├── static/               # JS, CSS, иконки
+    ├── static/               # JS, CSS
     ├── templates/dds         # HTML-шаблоны
 ├── manage.py
 ├── requirements.txt
