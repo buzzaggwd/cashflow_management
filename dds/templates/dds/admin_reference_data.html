@@ -66,6 +66,145 @@
                 </div>
             </div>
         </div>
+
+        <h2>Типы</h2>
+        <table id="type-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#type-modal">Добавить тип</button>
+
+        <div class="modal fade" id="type-modal" tabindex="-1" aria-labelledby="typeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="typeModalLabel">Редактирование типа</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="type-form">
+                            <input type="hidden" id="type-id" name="id">
+                            <div class="mb-3">
+                                <label for="type-name" class="form-label">Имя</label>
+                                <input type="text" class="form-control" id="type-name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="type-description" class="form-label">Описание</label>
+                                <textarea class="form-control" id="type-description" name="description"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="save-type-btn">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Категории -->
+<h2>Категории</h2>
+<table id="category-table" class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Описание</th>
+            <th>Тип</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#category-modal" id="add-category-btn">Добавить категорию</button>
+
+<div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">Редактирование категории</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form">
+                    <input type="hidden" id="category-id" name="id">
+                    <div class="mb-3">
+                        <label for="category-name" class="form-label">Имя</label>
+                        <input type="text" class="form-control" id="category-name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category-description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="category-description" name="description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category-type" class="form-label">Тип</label>
+                        <select class="form-control" id="category-type" name="type" required>
+                            <option value="">Выберите тип</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="save-category-btn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подкатегории -->
+<h2>Подкатегории</h2>
+<table id="subcategory-table" class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Описание</th>
+            <th>Категория</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subcategory-modal" id="add-subcategory-btn">Добавить подкатегорию</button>
+
+<div class="modal fade" id="subcategory-modal" tabindex="-1" aria-labelledby="subcategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subcategoryModalLabel">Редактирование подкатегории</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="subcategory-form">
+                    <input type="hidden" id="subcategory-id" name="id">
+                    <div class="mb-3">
+                        <label for="subcategory-name" class="form-label">Имя</label>
+                        <input type="text" class="form-control" id="subcategory-name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subcategory-description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="subcategory-description" name="description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subcategory-category" class="form-label">Категория</label>
+                        <select class="form-control" id="subcategory-category" name="category" required>
+                            <option value="">Выберите категорию</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="save-subcategory-btn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -80,4 +219,4 @@
     </script>
 </body>
 
-</html>
+</html>    

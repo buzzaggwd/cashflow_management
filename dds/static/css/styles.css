@@ -17,3 +17,11 @@ td.actions {
 .modal-backdrop.show {
     opacity: 0.5;
 }
+
+.table tr {
+    transition: transform 0.3s ease;
+}
+.table tr.deleted {
+    transform: translateX(100%);
+    opacity: 0;
+}

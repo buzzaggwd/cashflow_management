@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework import viewsets
 from .models import Status, Type, Category, Subcategory, DDSRecord
 from .serializers import StatusSerializer, TypeSerializer, CategorySerializer, SubcategorySerializer, DDSRecordSerializer
 from django.shortcuts import render
@@ -35,6 +36,10 @@ class CategoryListCreate(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
 class CategoryByTypeList(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -50,6 +55,15 @@ class SubcategoryListCreate(generics.ListCreateAPIView):
     filterset_fields = ['category']  # Позволяет фильтровать по category_id
     filter_backends = [DjangoFilterBackend]  # Включает фильтрацию
 
+class SubcategoryListCreate(generics.ListCreateAPIView):
+    queryset = Subcategory.objects.all()
+    serializer_class = SubcategorySerializer
+    filterset_fields = ['category']
+
+class SubcategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Subcategory.objects.all()
+    serializer_class = SubcategorySerializer
+
 class SubcategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Subcategory.objects.all()
     serializer_class = SubcategorySerializer
@@ -64,3 +78,11 @@ class DDSRecordListCreate(generics.ListCreateAPIView):
 class DDSRecordDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = DDSRecord.objects.all()
     serializer_class = DDSRecordSerializer
+
+class StatusViewSet(viewsets.ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = Type.objects.all()
+    serializer_class = TypeSerializer
