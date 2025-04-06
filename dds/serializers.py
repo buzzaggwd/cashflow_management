@@ -17,27 +17,25 @@ class TypeSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     type = TypeSerializer(read_only=True)
+    type_id = serializers.PrimaryKeyRelatedField(
+        queryset=Type.objects.all(), source='type', write_only=True
+    )
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'type', 'type_id']
+
 
 class SubcategorySerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), source='category', write_only=True
+    )
 
     class Meta:
         model = Subcategory
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'category', 'category_id']
 
-    def create(self, validated_data):
-        category_id = self.context['request'].data.get('category')
-        if category_id:
-            try:
-                category = Category.objects.get(id=category_id)
-                validated_data['category'] = category
-            except Category.DoesNotExist:
-                raise serializers.ValidationError("Category does not exist.")
-        return super().create(validated_data)
 
 class DDSRecordSerializer(serializers.ModelSerializer):
     status_name = serializers.CharField(source='status.name', read_only=True)

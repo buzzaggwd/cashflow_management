@@ -345,58 +345,63 @@ async function loadTypesForCategoryForm(selectedTypeId = null) {
 }
 
 document.getElementById('add-category-btn').addEventListener('click', () => {
-    loadTypesForCategoryForm(); // Автоматическая загрузка типов при открытии модального окна
+    document.getElementById("category-id").value = ""; // <--- сброс ID
+    loadTypesForCategoryForm(); // Автоматическая загрузка типов
 });
+
 
 document
   .getElementById("save-category-btn")
   .addEventListener("click", async function () {
-        const categoryId = document.getElementById("category-id").value;
-        const formData = new FormData(document.getElementById("category-form"));
-        const category = Object.fromEntries(formData);
-        const csrfToken = getCSRFToken();
+    const categoryId = document.getElementById("category-id").value;
+    const formData = new FormData(document.getElementById("category-form"));
+    const category = Object.fromEntries(formData);
+    const csrfToken = getCSRFToken();
 
-        // 修改 type 字段为字典类型
-        if (category.type) {
-            category.type = { id: parseInt(category.type) };
+    // ✨ Исправление здесь:
+    if (category.type) {
+      category.type_id = parseInt(category.type);
+      delete category.type;
+    }
+
+    try {
+      const response = await fetch(
+        categoryId ? `/api/categories/${categoryId}/` : "/api/categories/",
+        {
+          method: categoryId ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify(category),
         }
+      );
 
-        try {
-            const response = await fetch(
-                categoryId ? `/api/categories/${categoryId}/` : "/api/categories/",
-                {
-                    method: categoryId ? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken,
-                    },
-                    body: JSON.stringify(category),
-                }
-            );
+      if (response.ok) {
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("category-modal")
+        );
+        modal.hide();
+        loadCategories();
+      } else {
+        alert("Ошибка: " + (await response.text()));
+      }
+    } catch (error) {
+      console.error("Ошибка:", error);
+    }
+  });
 
-            if (response.ok) {
-                const modal = bootstrap.Modal.getInstance(
-                    document.getElementById("category-modal")
-                );
-                modal.hide();
-                loadCategories();
-            } else {
-                alert("Ошибка: " + (await response.text()));
-            }
-        } catch (error) {
-            console.error("Ошибка:", error);
-        }
-    });
 
-document
+  document
   .getElementById("category-modal")
   .addEventListener("hidden.bs.modal", () => {
-        document.getElementById("category-form").reset();
-        const modal = bootstrap.Modal.getInstance(
-            document.getElementById("category-modal")
-        );
-        if (modal) modal.dispose();
-    });
+    document.getElementById("category-form").reset();
+    document.getElementById("category-id").value = ""; // <--- добавим и сюда
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("category-modal")
+    );
+    if (modal) modal.dispose();
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     loadCategories();
@@ -494,53 +499,59 @@ async function loadCategoriesForSubcategoryForm(selectedCategoryId = null) {
 }
 
 document.getElementById('add-subcategory-btn').addEventListener('click', () => {
-    loadCategoriesForSubcategoryForm(); // Автоматическая загрузка категорий при открытии модального окна
+    document.getElementById("subcategory-id").value = ""; // <--- сброс ID
+    loadCategoriesForSubcategoryForm(); // (если есть такая функция)
 });
 
 document
   .getElementById("save-subcategory-btn")
   .addEventListener("click", async function () {
-        const subcategoryId = document.getElementById("subcategory-id").value;
-        const formData = new FormData(document.getElementById("subcategory-form"));
-        const subcategory = Object.fromEntries(formData);
-        const csrfToken = getCSRFToken();
+    const subcategoryId = document.getElementById("subcategory-id").value;
+    const formData = new FormData(document.getElementById("subcategory-form"));
+    const subcategory = Object.fromEntries(formData);
+    const csrfToken = getCSRFToken();
 
-        // 确保 category 字段是一个整数
-        subcategory.category = parseInt(subcategory.category);
+    // 🔧 Главное исправление
+    if (subcategory.category) {
+      subcategory.category_id = parseInt(subcategory.category);
+      delete subcategory.category;
+    }
 
-        try {
-            const response = await fetch(
-                subcategoryId
-                   ? `/api/subcategories/${subcategoryId}/`
-                    : "/api/subcategories/",
-                {
-                    method: subcategoryId? "PUT" : "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken,
-                    },
-                    body: JSON.stringify(subcategory),
-                }
-            );
-
-            if (response.ok) {
-                const modal = bootstrap.Modal.getInstance(
-                    document.getElementById("subcategory-modal")
-                );
-                modal.hide();
-                loadSubcategories();
-            } else {
-                alert("Ошибка: " + (await response.text()));
-            }
-        } catch (error) {
-            console.error("Ошибка:", error);
+    try {
+      const response = await fetch(
+        subcategoryId
+          ? `/api/subcategories/${subcategoryId}/`
+          : "/api/subcategories/",
+        {
+          method: subcategoryId ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify(subcategory),
         }
-    });
+      );
+
+      if (response.ok) {
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("subcategory-modal")
+        );
+        modal.hide();
+        loadSubcategories();
+      } else {
+        alert("Ошибка: " + (await response.text()));
+      }
+    } catch (error) {
+      console.error("Ошибка:", error);
+    }
+  });
+
 
 document
   .getElementById("subcategory-modal")
   .addEventListener("hidden.bs.modal", () => {
         document.getElementById("subcategory-form").reset();
+        document.getElementById("subcategory-id").value = "";
         const modal = bootstrap.Modal.getInstance(
             document.getElementById("subcategory-modal")
         );
