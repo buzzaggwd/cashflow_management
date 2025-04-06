@@ -59,19 +59,17 @@ http://127.0.0.1:8000/
 ## Технологии
 
 Python 3.x
-
 Django
-
 Django REST Framework
-
 SQLite
-
 HTML + Bootstrap 5
-
-Vanilla JavaScript (модульный подход)
 
 
 ## Скриншоты
+![image_2025-04-06_21-24-54](https://github.com/user-attachments/assets/f32cfe8c-3e55-44ee-8fd9-a2b863e8c29d)
+![image_2025-04-06_21-24-54 (2)](https://github.com/user-attachments/assets/5eef7d30-abbf-4098-a653-951f37bb4db0)
+![image_2025-04-06_21-24-54 (3)](https://github.com/user-attachments/assets/14affe53-18bc-4af4-a4ef-25ab7cb0e312)
+![image_2025-04-06_21-24-55](https://github.com/user-attachments/assets/8cc4b775-1bd9-4f67-bcf8-fea5b2e94293)
 
 
 ## Структура проекта
