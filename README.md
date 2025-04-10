@@ -20,8 +20,8 @@
 ### 1. Клонируйте репозиторий
 
 ```bash
-git clone https://github.com/your-username/dds-app.git
-cd dds-app
+git clone https://github.com/buzzaggwd/cashflow_management.git
+cd cashflow_management
 ```
 
 
